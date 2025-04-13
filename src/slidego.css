@@ -6,6 +6,7 @@
 
 .slidego-track {
     display: flex;
+    transition: transform ease .3s;
 }
 
 .slidego-slide {

@@ -8,6 +8,7 @@ function Slidego(selector, options = {}) {
 
     this.opt = Object.assign({}, options);
     this.slides = Array.from(this.container.children);
+    this.currentIndex = 0;
 
     this._init();
 }
@@ -46,6 +47,12 @@ Slidego.prototype._createNavigation = function () {
     this.nextBtn.onclick = () => this.moveSlide(1);
 };
 
-Slidego.prototype.moveSlide() = function(step) {
-
+Slidego.prototype.moveSlide = function(step) {
+    this.currentIndex = Math.min(
+        Math.max(this.currentIndex + step, 0), 
+        this.slides.length - 3
+    );
+    console.log(this.currentIndex);
+    this.offset = -(this.currentIndex * (100 / 3));
+    this.track.style.transform = `translateX(${this.offset}%)`;
 }
