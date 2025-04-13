@@ -1,0 +1,32 @@
+.slidego-wrapper {
+    position: relative;
+    width: 100%;
+    overflow: hidden;
+}
+
+.slidego-track {
+    display: flex;
+}
+
+.slidego-slide {
+    flex: 0 0 calc(100% / 3);
+}
+
+.slidego-prev, .slidego-next {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    border: none;
+    outline: none;
+    padding: 10px;
+    color: #fff;
+    background: rgba(0, 0, 0, 0.3);
+}
+
+.slidego-prev {
+    left: 10px;
+}
+
+.slidego-next {
+    right: 10px;
+}
