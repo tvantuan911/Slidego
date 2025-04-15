@@ -1,7 +1,10 @@
 .slidego-wrapper {
-    position: relative;
     width: 100%;
     overflow: hidden;
+}
+
+.slidego-content {
+    position: relative;
 }
 
 .slidego-track {
@@ -29,4 +32,24 @@
 
 .slidego-next {
     right: 10px;
+}
+
+.slidego-nav {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 8px;
+}
+
+.slidego-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    border: none;
+    background: #ccc;
+}
+
+.slidego-dot.active {
+    background: #333;
 }

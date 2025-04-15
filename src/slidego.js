@@ -10,7 +10,8 @@ function Slidego(selector, options = {}) {
         {
             items: 1,
             loop: false,
-            speed: 300
+            speed: 300,
+            nav: true,
         },
         options
     );
@@ -23,8 +24,21 @@ function Slidego(selector, options = {}) {
 
 Slidego.prototype._init = function () {
     this.container.classList.add("slidego-wrapper");
+
+    this._createContent();
+
     this._createTrack();
-    this._createNavigation();
+    this._createControls();
+
+    if (this.opt.nav) {
+        this._createNav();
+    }
+};
+
+Slidego.prototype._createContent = function () {
+    this.content = document.createElement("div");
+    this.content.className = "slidego-content";
+    this.container.appendChild(this.content);
 };
 
 Slidego.prototype._createTrack = function () {
@@ -47,10 +61,10 @@ Slidego.prototype._createTrack = function () {
         this.track.appendChild(slide);
     });
 
-    this.container.appendChild(this.track);
+    this.content.appendChild(this.track);
 };
 
-Slidego.prototype._createNavigation = function () {
+Slidego.prototype._createControls = function () {
     this.prevBtn = document.createElement("button");
     this.nextBtn = document.createElement("button");
 
@@ -60,10 +74,39 @@ Slidego.prototype._createNavigation = function () {
     this.prevBtn.className = "slidego-prev";
     this.nextBtn.className = "slidego-next";
 
-    this.container.append(this.prevBtn, this.nextBtn);
+    this.content.append(this.prevBtn, this.nextBtn);
 
     this.prevBtn.onclick = () => this.moveSlide(-1);
     this.nextBtn.onclick = () => this.moveSlide(1);
+};
+
+Slidego.prototype._createNav = function () {
+    this.navWrapper = document.createElement("div");
+    this.navWrapper.className = "slidego-nav";
+
+    const slideCount =
+        this.slides.length - (this.opt.loop ? this.opt.items * 2 : 0);
+    const pageCount = Math.ceil(slideCount / this.opt.items);
+
+    for (let i = 0; i < pageCount; i++) {
+        const dot = document.createElement("button");
+        dot.className = "slidego-dot";
+
+        if (i === 0) {
+            dot.classList.add("active");
+        }
+
+        dot.onclick = () => {
+            this.currentIndex = this.opt.loop
+                ? i * this.opt.items + this.opt.items
+                : i * this.opt.items;
+            this._updatePosition();
+        };
+
+        this.navWrapper.appendChild(dot);
+    }
+
+    this.container.append(this.navWrapper);
 };
 
 Slidego.prototype.moveSlide = function (step) {
@@ -80,10 +123,11 @@ Slidego.prototype.moveSlide = function (step) {
             const maxIndex = this.slides.length - this.opt.items;
             if (this.currentIndex <= 0) {
                 this.currentIndex = maxIndex - this.opt.items;
+                this._updatePosition(true);
             } else if (this.currentIndex >= maxIndex) {
                 this.currentIndex = this.opt.items;
+                this._updatePosition(true);
             }
-            this._updatePosition(true);
         }
         this._isAnimating = false;
     }, this.opt.speed);
@@ -91,10 +135,34 @@ Slidego.prototype.moveSlide = function (step) {
     this._updatePosition();
 };
 
+Slidego.prototype._updateNav = function () {
+    let realIndex = this.currentIndex;
+
+    if (this.opt.loop) {
+        const slideCount = this.slides.length - this.opt.items * 2;
+        realIndex =
+            (this.currentIndex - this.opt.items + slideCount) % slideCount;
+    }
+
+    const pageIndex = Math.floor(realIndex / this.opt.items);
+
+    const dots = Array.from(this.navWrapper.children);
+
+    dots.forEach((dot, index) => {
+        dots.classList.toggle("active", index === pageIndex);
+    });
+};
+
 Slidego.prototype._updatePosition = function (instant = false) {
-    this.track.style.transition = instant ? "none" : `transform ease ${this.opt.speed}ms`;
+    this.track.style.transition = instant
+        ? "none"
+        : `transform ease ${this.opt.speed}ms`;
     this.offset = -(this.currentIndex * (100 / this.opt.items));
     this.track.style.transform = `translateX(${this.offset}%)`;
+
+    if (this.opt.nav && !instant) {
+        this._updateNav();
+    }
 };
 
 //  4 5 6 1 2 3 4 5 6 1 2 3
