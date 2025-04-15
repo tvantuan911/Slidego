@@ -10,6 +10,7 @@ function Slidego(selector, options = {}) {
         {
             items: 1,
             loop: false,
+            speed: 300
         },
         options
     );
@@ -30,10 +31,15 @@ Slidego.prototype._createTrack = function () {
     this.track = document.createElement("div");
     this.track.className = "slidego-track";
 
-    const cloneHead = this.slides.slice(-this.opt.items).map((node) => node.cloneNode(true));
-    const cloneTail = this.slides.slice(0, this.opt.items).map((node) => node.cloneNode(true));
-
-    this.slides = cloneHead.concat(this.slides.concat(cloneTail));
+    if (this.opt.loop) {
+        const cloneHead = this.slides
+            .slice(-this.opt.items)
+            .map((node) => node.cloneNode(true));
+        const cloneTail = this.slides
+            .slice(0, this.opt.items)
+            .map((node) => node.cloneNode(true));
+        this.slides = cloneHead.concat(this.slides.concat(cloneTail));
+    }
 
     this.slides.forEach((slide) => {
         slide.classList.add("slidego-slide");
@@ -64,12 +70,13 @@ Slidego.prototype.moveSlide = function (step) {
     if (this._isAnimating) return;
     this._isAnimating = true;
 
-    if (this.opt.loop) {
-        this.currentIndex =
-            (this.currentIndex + step + this.slides.length) %
-            this.slides.length;
+    this.currentIndex = Math.min(
+        Math.max(this.currentIndex + step, 0),
+        this.slides.length - this.opt.items
+    );
 
-        this.track.ontransitionend = () =>  {
+    setTimeout(() => {
+        if (this.opt.loop) {
             const maxIndex = this.slides.length - this.opt.items;
             if (this.currentIndex <= 0) {
                 this.currentIndex = maxIndex - this.opt.items;
@@ -77,23 +84,17 @@ Slidego.prototype.moveSlide = function (step) {
                 this.currentIndex = this.opt.items;
             }
             this._updatePosition(true);
-            this._isAnimating = false;
         }
-    } else {
-        this.currentIndex = Math.min(
-            Math.max(this.currentIndex + step, 0),
-            this.slides.length - this.opt.items
-        );
-    }
+        this._isAnimating = false;
+    }, this.opt.speed);
     console.log(this.currentIndex);
     this._updatePosition();
 };
 
 Slidego.prototype._updatePosition = function (instant = false) {
-    this.track.style.transition = instant ? 'none' : 'transform ease 0.3s';
+    this.track.style.transition = instant ? "none" : `transform ease ${this.opt.speed}ms`;
     this.offset = -(this.currentIndex * (100 / this.opt.items));
     this.track.style.transform = `translateX(${this.offset}%)`;
-}
+};
 
-
-//  4 5 6 1 2 3 4 5 6 1 2 3 
+//  4 5 6 1 2 3 4 5 6 1 2 3
