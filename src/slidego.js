@@ -12,6 +12,11 @@ function Slidego(selector, options = {}) {
             loop: false,
             speed: 300,
             nav: true,
+            controls: true,
+            controlsText: ["<", ">"],
+            prevButton: null,
+            nextButton: null,
+            slideBy: 1,
         },
         options
     );
@@ -26,9 +31,11 @@ Slidego.prototype._init = function () {
     this.container.classList.add("slidego-wrapper");
 
     this._createContent();
-
     this._createTrack();
-    this._createControls();
+
+    if (this.opt.controls) {
+        this._createControls();
+    }
 
     if (this.opt.nav) {
         this._createNav();
@@ -65,19 +72,29 @@ Slidego.prototype._createTrack = function () {
 };
 
 Slidego.prototype._createControls = function () {
-    this.prevBtn = document.createElement("button");
-    this.nextBtn = document.createElement("button");
+    this.prevBtn = this.opt.prevButton
+        ? document.querySelector(this.opt.prevButton)
+        : document.createElement("button");
+    this.nextBtn = this.opt.nextButton
+        ? document.querySelector(this.opt.nextButton)
+        : document.createElement("button");
 
-    this.prevBtn.textContent = "<";
-    this.nextBtn.textContent = ">";
+    if (!this.opt.prevButton) {
+        this.prevBtn.textContent = this.opt.controlsText[0];
+        this.prevBtn.className = "slidego-prev";
+        this.content.appendChild(prevBtn);
+    }
 
-    this.prevBtn.className = "slidego-prev";
-    this.nextBtn.className = "slidego-next";
+    if (!this.opt.nextButton) {
+        this.nextBtn.textContent = this.opt.controlsText[1];
+        this.nextBtn.className = "slidego-next";
+        this.content.append(this.prevBtn, this.nextBtn);
+    }
 
-    this.content.append(this.prevBtn, this.nextBtn);
+    const stepSize = this.opt.slideBy === "page" ? this.opt.items : this.opt.slideBy;
 
-    this.prevBtn.onclick = () => this.moveSlide(-1);
-    this.nextBtn.onclick = () => this.moveSlide(1);
+    this.prevBtn.onclick = () => this.moveSlide(-stepSize);
+    this.nextBtn.onclick = () => this.moveSlide(stepSize);
 };
 
 Slidego.prototype._createNav = function () {
@@ -149,7 +166,7 @@ Slidego.prototype._updateNav = function () {
     const dots = Array.from(this.navWrapper.children);
 
     dots.forEach((dot, index) => {
-        dots.classList.toggle("active", index === pageIndex);
+        dot.classList.toggle("active", index === pageIndex);
     });
 };
 
