@@ -97,12 +97,15 @@ Slidego.prototype._createControls = function () {
     this.nextBtn.onclick = () => this.moveSlide(stepSize);
 };
 
+Slidego.prototype._getSlideCount = function() {
+    return this.slides.length - (this.opt.loop ? this.opt.items * 2 : 0);
+}
+
 Slidego.prototype._createNav = function () {
     this.navWrapper = document.createElement("div");
     this.navWrapper.className = "slidego-nav";
 
-    const slideCount =
-        this.slides.length - (this.opt.loop ? this.opt.items * 2 : 0);
+    const slideCount = this._getSlideCount();
     const pageCount = Math.ceil(slideCount / this.opt.items);
 
     for (let i = 0; i < pageCount; i++) {
@@ -138,11 +141,12 @@ Slidego.prototype.moveSlide = function (step) {
     setTimeout(() => {
         if (this.opt.loop) {
             const maxIndex = this.slides.length - this.opt.items;
-            if (this.currentIndex <= 0) {
-                this.currentIndex = maxIndex - this.opt.items;
+            const slideCount = this._getSlideCount();
+            if (this.currentIndex < this.opt.items) {
+                this.currentIndex += slideCount;
                 this._updatePosition(true);
-            } else if (this.currentIndex >= maxIndex) {
-                this.currentIndex = this.opt.items;
+            } else if (this.currentIndex > slideCount) {
+                this.currentIndex -= slideCount;
                 this._updatePosition(true);
             }
         }
@@ -151,6 +155,9 @@ Slidego.prototype.moveSlide = function (step) {
     console.log(this.currentIndex);
     this._updatePosition();
 };
+
+// 4 5 6 (clone) [1 2 3 4 5 6 ] 1 2 3 (clone)
+// 0 1 2          3 4 5 6 7 8   9 10 11
 
 Slidego.prototype._updateNav = function () {
     let realIndex = this.currentIndex;
